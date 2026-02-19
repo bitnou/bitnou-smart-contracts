@@ -119,8 +119,21 @@ BSCSCAN_API_KEY=tu_api_key_de_bscscan
 | Parámetro | Valor |
 |-----------|-------|
 | Nombre de Red | `hardhat` |
-| Chain ID | `1337` |
+| Chain ID | `31337` |
 | Tipo | `edr-simulated` |
+
+### Nodo Local de Desarrollo
+
+1. Arranca el nodo persistente de Hardhat que expone el endpoint RPC del localnet:
+
+	```bash
+	pnpm localnet
+	```
+
+	Esto ejecuta Hardhat Node con `--hostname 0.0.0.0 --port 8545 --chain-id 31337` para que otras terminales, scripts o clientes se conecten a `http://127.0.0.1:8545` mientras el proceso se mantiene vivo (ver https://hardhat.org/docs/guides/hardhat-node).
+
+	> **Nota:** El contrato BNOU está configurado para detectar el chain ID `31337` (Hardhat) e ignorar la creación del par de liquidez ya que el router de Uniswap no existe localmente. Esto permite que el token se despliegue y sea probado con funcionalidad básica (transferencias, saldos, propiedad) sin depender de contratos DEX externos. En redes de producción (BSC, Ethereum), el token creará un par automáticamente.
+
 
 ## Scripts
 
@@ -129,7 +142,12 @@ BSCSCAN_API_KEY=tu_api_key_de_bscscan
 | `pnpm compile` | Compilar todos los contratos Solidity |
 | `pnpm test` | Ejecutar suite de pruebas Mocha |
 | `pnpm test:all` | Ejecutar todos los runners de prueba (Mocha + Node.js) |
-| `pnpm node` | Iniciar nodo local de Hardhat |
+| `pnpm localnet` | Iniciar nodo Hardhat abierto en 0.0.0.0:8545 para pruebas persistentes |
+| `pnpm node` | Arrancar un nodo Hardhat rápido (configuración por defecto) |
+
+| `pnpm ignition:bnou:localnet` | Desplegar el token BNOU con Ignition sobre la red Hardhat `localhost` que ya está corriendo |
+| `pnpm ignition:bnou:localnet:fresh` | Elimina los despliegues Ignition y redespliega BNOU desde cero (útil después de cambios en el contrato) |
+| `pnpm deploy:local:bnou` | Desplegar BNOU usando un script TypeScript personalizado con salida detallada |
 
 | `pnpm lint` | Ejecutar ESLint |
 | `pnpm format` | Formatear código con Prettier |

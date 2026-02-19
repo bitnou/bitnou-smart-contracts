@@ -8,6 +8,7 @@
     "compile": "hardhat compile",
     "format": "prettier --write \"**/*.{ts,tsx,js,json,sol,md}\"",
     "lint": "eslint \"{scripts,test}/**/*.{ts,tsx}\" hardhat.config.ts",
+    "localnet": "hardhat node --hostname 0.0.0.0 --port 8545 --chain-id 31337",
     "node": "hardhat node",
     "test": "hardhat test mocha",
     "test:all": "hardhat test",
@@ -15,7 +16,10 @@
     "deploy:bnou:testnet": "hardhat run scripts/deployBNOUToken.ts --network bscTestnet",
     "deploy:bnou:mainnet": "hardhat run scripts/deployBNOUToken.ts --network bsc",
     "ignition:bnou:testnet": "hardhat ignition deploy ignition/modules/BNOUTokenModule.ts --network bscTestnet",
-    "ignition:bnou:mainnet": "hardhat ignition deploy ignition/modules/BNOUTokenModule.ts --network bsc"
+    "ignition:bnou:mainnet": "hardhat ignition deploy ignition/modules/BNOUTokenModule.ts --network bsc",
+    "ignition:bnou:localnet": "hardhat ignition deploy ignition/modules/BNOUTokenModule.ts --network localhost",
+    "ignition:bnou:localnet:fresh": "rm -rf ignition/deployments && hardhat ignition deploy ignition/modules/BNOUTokenModule.ts --network localhost",
+    "deploy:local:bnou": "hardhat run scripts/deployLocalBNOU.ts --network localhost"
   },
   "keywords": [],
   "author": "",
