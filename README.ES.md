@@ -145,9 +145,11 @@ BSCSCAN_API_KEY=tu_api_key_de_bscscan
 | `pnpm localnet` | Iniciar nodo Hardhat abierto en 0.0.0.0:8545 para pruebas persistentes |
 | `pnpm node` | Arrancar un nodo Hardhat rápido (configuración por defecto) |
 
-| `pnpm ignition:bnou:localnet` | Desplegar el token BNOU con Ignition sobre la red Hardhat `localhost` que ya está corriendo |
-| `pnpm ignition:bnou:localnet:fresh` | Elimina los despliegues Ignition y redespliega BNOU desde cero (útil después de cambios en el contrato) |
-| `pnpm deploy:local:bnou` | Desplegar BNOU usando un script TypeScript personalizado con salida detallada |
+| `pnpm deploy:ignition:localhost` | Desplegar el token BNOU con Ignition sobre la red `localhost` en ejecución |
+| `pnpm deploy:ignition:localhost:fresh` | Elimina los despliegues Ignition y redespliega BNOU desde cero (útil después de cambios en el contrato) |
+| `pnpm deploy:ignition:testnet` | Desplegar el token BNOU con Ignition en BSC Testnet |
+| `pnpm deploy:ignition:mainnet` | Desplegar el token BNOU con Ignition en BSC Mainnet |
+| `pnpm deploy:dummy` | Desplegar un token BEP20 simulado para testing (solo local) |
 
 | `pnpm lint` | Ejecutar ESLint |
 | `pnpm format` | Formatear código con Prettier |
@@ -184,30 +186,17 @@ El módulo **BNOUTokenModule** despliega el contrato de token BNOU con caracter�
 - Toggle de trading para prevenir front-running en lanzamiento
 - Recuperación de emergencia de tokens
 
-#### Usando Ignition (Recomendado)
+#### Usando Hardhat Ignition (Recomendado)
 
 ```bash
 # Desplegar en BSC Testnet
-pnpm ignition:bnou:testnet
+pnpm deploy:ignition:testnet
 
 # Desplegar en BSC Mainnet
-pnpm ignition:bnou:mainnet
+pnpm deploy:ignition:mainnet
 
 # O manualmente:
 pnpm hardhat ignition deploy ignition/modules/BNOUTokenModule.ts --network bscTestnet
-```
-
-#### Usando Script Manual
-
-```bash
-# Desplegar en BSC Testnet
-pnpm deploy:bnou:testnet
-
-# Desplegar en BSC Mainnet
-pnpm deploy:bnou:mainnet
-
-# O manualmente:
-pnpm hardhat run scripts/deployBNOUToken.ts --network bscTestnet
 ```
 
 #### Pasos Post-Despliegue

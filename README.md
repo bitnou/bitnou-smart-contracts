@@ -145,9 +145,11 @@ BSCSCAN_API_KEY=your_bscscan_api_key
 | `pnpm localnet` | Launch Hardhat node bound to 0.0.0.0:8545 for persistent localnet testing |
 | `pnpm node` | Start a quick Hardhat node (default settings) |
 
-| `pnpm ignition:bnou:localnet` | Deploy the BNOU token via Ignition onto the running `localhost` Hardhat network |
-| `pnpm ignition:bnou:localnet:fresh` | Clear Ignition deployments and redeploy BNOU fresh (useful after contract changes) |
-| `pnpm deploy:local:bnou` | Deploy BNOU using a custom TypeScript script with detailed output |
+| `pnpm deploy:ignition:localhost` | Deploy the BNOU token via Ignition onto the running `localhost` Hardhat network |
+| `pnpm deploy:ignition:localhost:fresh` | Clear Ignition deployments and redeploy BNOU fresh (useful after contract changes) |
+| `pnpm deploy:ignition:testnet` | Deploy the BNOU token via Ignition to BSC Testnet |
+| `pnpm deploy:ignition:mainnet` | Deploy the BNOU token via Ignition to BSC Mainnet |
+| `pnpm deploy:dummy` | Deploy a mock BEP20 token for testing (local only) |
 
 | `pnpm lint` | Run ESLint |
 | `pnpm format` | Format code with Prettier |
@@ -184,30 +186,17 @@ The **BNOUTokenModule** deploys the BNOU token contract with production-ready fe
 - Trading toggle to prevent launch front-running
 - Emergency token recovery
 
-#### Using Ignition (Recommended)
+#### Using Hardhat Ignition (Recommended)
 
 ```bash
 # Deploy to BSC Testnet
-pnpm ignition:bnou:testnet
+pnpm deploy:ignition:testnet
 
 # Deploy to BSC Mainnet
-pnpm ignition:bnou:mainnet
+pnpm deploy:ignition:mainnet
 
 # Or manually:
 pnpm hardhat ignition deploy ignition/modules/BNOUTokenModule.ts --network bscTestnet
-```
-
-#### Using Manual Script
-
-```bash
-# Deploy to BSC Testnet
-pnpm deploy:bnou:testnet
-
-# Deploy to BSC Mainnet
-pnpm deploy:bnou:mainnet
-
-# Or manually:
-pnpm hardhat run scripts/deployBNOUToken.ts --network bscTestnet
 ```
 
 #### Post-Deployment Steps
