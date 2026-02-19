@@ -4,6 +4,7 @@ import hardhatMochaPlugin from '@nomicfoundation/hardhat-mocha'
 
 // import '@nomicfoundation/hardhat-ignition-ethers'
 import '@nomicfoundation/hardhat-verify'
+import { verifyBscscanPlugin } from './tasks/index.js'
 import * as dotenv from 'dotenv'
 import etherscanConfig from './etherscan.config.js'
 
@@ -15,7 +16,7 @@ const bscMainnetRpcUrl = process.env.BSC_MAINNET_RPC_URL || 'https://bsc-datasee
 const bscTestnetRpcUrl = process.env.BSC_TESTNET_RPC_URL || 'https://data-seed-prebsc-1-s1.binance.org:8545/'
 
 const config: HardhatUserConfig = {
-  plugins: [hardhatToolboxViemPlugin, hardhatMochaPlugin],
+  plugins: [hardhatToolboxViemPlugin, hardhatMochaPlugin, verifyBscscanPlugin],
   solidity: {
     compilers: [
       {

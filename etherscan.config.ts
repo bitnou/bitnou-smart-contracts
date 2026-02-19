@@ -1,30 +1,27 @@
 import type { HardhatUserConfig } from 'hardhat/config'
+import { configVariable } from 'hardhat/config'
 
-const etherscanConfig = {
-  etherscan: {
-    apiKey: {
-      bsc: process.env.BSCSCAN_API_KEY || '',
-      bscTestnet: process.env.BSCSCAN_API_KEY || ''
+/**
+ * Hardhat 3 verification config.
+ *
+ * Uses `configVariable` to securely resolve the BscScan API key from
+ * the Hardhat keystore or from the BSCSCAN_API_KEY environment variable.
+ *
+ * Chain descriptors for BSC (56) and BSC Testnet (97) are built into
+ * Hardhat 3, so no custom chain definitions are needed.
+ */
+const verifyConfig = {
+  verify: {
+    etherscan: {
+      apiKey: configVariable('BSCSCAN_API_KEY')
     },
-    customChains: [
-      {
-        network: 'bsc',
-        chainId: 56,
-        urls: {
-          apiURL: 'https://api.bscscan.com/api',
-          browserURL: 'https://bscscan.com'
-        }
-      },
-      {
-        network: 'bscTestnet',
-        chainId: 97,
-        urls: {
-          apiURL: 'https://api-testnet.bscscan.com/api',
-          browserURL: 'https://testnet.bscscan.com'
-        }
-      }
-    ]
+    blockscout: {
+      enabled: false
+    },
+    sourcify: {
+      enabled: false
+    }
   }
-} as Partial<HardhatUserConfig>
+} satisfies Partial<HardhatUserConfig>
 
-export default etherscanConfig
+export default verifyConfig

@@ -31,6 +31,17 @@ The Bitnou ecosystem consists of:
 - **Test Suite**: 100% passing (12/12 tests) ✅
 - **Smart Contract Compilation**: Clean, no warnings ✅
 
+## Deployed Addresses 🚀
+
+| Network | Contract | Address |
+|---------|----------|---------|
+| **BSC Testnet** | BNOU Token | `0xFBf7B5d91297aC0b0b2D184af0b9F81FE053819a` |
+| **BSC Mainnet** | BNOU Token | `0x4f47f066d839634bf4e992021a65d209B383EE1e` |
+
+**Block Explorer Links:**
+- [BNOU on BSC Testnet (BscScan)](https://testnet.bscscan.com/token/0xFBf7B5d91297aC0b0b2D184af0b9F81FE053819a)
+- [BNOU on BSC Mainnet (BscScan)](https://bscscan.com/address/0x4f47f066d839634bf4e992021a65d209B383EE1e#code)
+
 ## Contracts
 
 | Contract | Description |
@@ -188,10 +199,11 @@ Both compile to separate artifacts: `BNOU` and `BNOUDev` respectively.
 | `pnpm deploy:bnou:dev` | Deploy BNOU.dev to local Hardhat | ✅ Tested |
 | `pnpm deploy:ignition:testnet` | Deploy BNOU (production) to BSC Testnet | ✅ Ready |
 | `pnpm deploy:ignition:mainnet` | Deploy BNOU (production) to BSC Mainnet | ✅ Ready |
-
-| `pnpm lint` | Run ESLint |
-| `pnpm format` | Format code with Prettier |
-| `pnpm typecheck` | Run TypeScript type checker |
+| `pnpm hardhat verify-bscscan --network bscTestnet` | Verify all contracts on BSC Testnet | ✅ Ready |
+| `pnpm hardhat verify-bscscan --network bsc` | Verify all contracts on BSC Mainnet | ✅ Ready |
+| `pnpm lint` | Run ESLint | ✅ Ready |
+| `pnpm format` | Format code with Prettier | ✅ Ready |
+| `pnpm typecheck` | Run TypeScript type checker | ✅ Ready |
 
 ## Testing
 
@@ -279,17 +291,116 @@ pnpm hardhat verify --network bscTestnet <CONTRACT_ADDRESS>
 
 Ensure you deploy BNOU to a supported network or use BNOU.dev for local Hardhat testing.
 
-## Contract Verification
+### Clearing Deployment Cache (Reconciliation Issues)
 
-Verify contracts on BscScan after deployment:
+If you encounter a **reconciliation failed** error when deploying, it means Hardhat Ignition detected a mismatch between:
+- The deployer account that previously deployed the contract
+- The current deployer account (derived from your `PRIVATE_KEY` in `.env`)
+
+**Error Example:**
+```
+[ BNOUTokenModule ] reconciliation failed ⛔
+From account has been changed from 0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266 to 0x8d447121d5fed79965be10ebea6305691e8ecb89
+```
+
+#### Solution: Clear the Deployment Cache
+
+Hardhat Ignition stores deployment state in `ignition/deployments/chain-<CHAIN_ID>/`. To clear the cache and allow a fresh deployment:
 
 ```bash
-# Verify a contract
-pnpm hardhat verify --network bscTestnet <CONTRACT_ADDRESS> <CONSTRUCTOR_ARGS>
+# Clear cache for BSC Testnet (chain 97)
+rm -rf ignition/deployments/chain-97/
 
-# Example: Verify BitnouCoin
-pnpm hardhat verify --network bscTestnet 0x1234...5678 0xYourInitializerAddress
+# Clear cache for BSC Mainnet (chain 56)
+rm -rf ignition/deployments/chain-56/
+
+# Clear cache for Ethereum Sepolia (chain 11155111)
+rm -rf ignition/deployments/chain-11155111/
+
+# Clear all deployment caches
+rm -rf ignition/deployments/
 ```
+
+⚠️ **Warning**: Clearing the cache loses track of previously deployed contracts. Only do this if:
+1. You're deploying to a new account
+2. You're redeploying to a testnet
+3. You have documented the deployed contract addresses elsewhere
+
+#### Best Practices
+
+- **Keep your `.env` PRIVATE_KEY consistent** across deployments to the same network
+- **Document deployed addresses** separately (e.g., in a deployment log file)
+- **Backup `ignition/deployments/` folder** before clearing if you need to reference old deployments
+- **Use different accounts for mainnet and testnet** deployments for security
+
+## Contract Verification & Publishing
+
+Verify and publish your contract source code on BscScan after deployment. This makes the contract ABI publicly available and builds trust.
+
+### Prerequisites
+
+✅ **Already configured in this project:**
+- `@nomicfoundation/hardhat-verify` plugin installed
+- BscScan API key stored in `.env` as `BSCSCAN_API_KEY`
+- Network configuration for BSC Mainnet (56) and BSC Testnet (97)
+
+### Using the Verification Task
+
+For convenience, use the custom Hardhat task to verify all configured contracts:
+
+```bash
+# Verify all contracts on BSC Testnet
+pnpm hardhat verify-bscscan --network bscTestnet
+
+# Verify all contracts on BSC Mainnet
+pnpm hardhat verify-bscscan --network bsc
+```
+
+### Manual Verification Command
+
+For individual contracts with different constructor arguments:
+
+```bash
+# Syntax
+pnpm hardhat verify --network <networkName> <CONTRACT_ADDRESS> <CONSTRUCTOR_ARGS>
+
+# Example with constructor arguments
+pnpm hardhat verify --network bscTestnet 0xYourAddress arg1 arg2 arg3
+
+# Example with array arguments
+pnpm hardhat verify --network bscTestnet 0xYourAddress '["0xAddress1", "0xAddress2"]' 100
+```
+
+### What Happens
+
+When you run the verify command:
+1. ✅ Compiler version and settings are matched
+2. ✅ Contract source code is reconstructed from artifacts
+3. ✅ Bytecode is verified against on-chain bytecode
+4. ✅ Source code is published on BscScan
+5. ✅ Contract ABI becomes publicly readable
+6. ✅ Users can interact with the contract via BscScan UI
+
+### Troubleshooting
+
+**Error: "Already Verified"**
+- The contract is already verified; check BscScan
+
+**Error: "Bytecode mismatch"**
+- Ensure you're verifying with the exact compiler version and settings used for deployment
+- Check hardhat.config.ts for the correct Solidity version
+
+**Error: "Invalid API Key"**
+- Verify `BSCSCAN_API_KEY` is set correctly in `.env`
+- Check API key is valid at [BscScan API](https://bscscan.com/apis)
+
+### After Verification
+
+Once verified, users can:
+- 👁️ View source code on BscScan
+- 📋 Read the ABI without needing separate documentation
+- 🔗 Interact directly through BscScan's "Write Contract" interface
+- 📊 Verify contract legitimacy and security
 
 ## Security & Quality Assurance
 

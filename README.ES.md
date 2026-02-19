@@ -31,6 +31,17 @@ El ecosistema Bitnou consiste en:
 - **Suite de Pruebas**: 100% aprobando (12/12 tests) ✅
 - **Compilación de Contratos**: Limpia, sin advertencias ✅
 
+## Direcciones Desplegadas 🚀
+
+| Red | Contrato | Dirección |
+|-----|----------|-----------|
+| **BSC Testnet** | Token BNOU | `0xFBf7B5d91297aC0b0b2D184af0b9F81FE053819a` |
+| **BSC Mainnet** | Token BNOU | `0x4f47f066d839634bf4e992021a65d209B383EE1e` |
+
+**Enlaces del Explorador de Bloques:**
+- [BNOU en BSC Testnet (BscScan)](https://testnet.bscscan.com/token/0xFBf7B5d91297aC0b0b2D184af0b9F81FE053819a)
+- [BNOU en BSC Mainnet (BscScan)](https://bscscan.com/address/0x4f47f066d839634bf4e992021a65d209B383EE1e#code)
+
 ## Contratos
 
 | Contrato | Descripción |
@@ -188,10 +199,11 @@ Ambas compilan a artefactos separados: `BNOU` y `BNOUDev` respectivamente.
 | `pnpm deploy:bnou:dev` | Desplegar BNOU.dev en Hardhat local | ✅ Probado |
 | `pnpm deploy:ignition:testnet` | Desplegar BNOU (producción) en BSC Testnet | ✅ Listo |
 | `pnpm deploy:ignition:mainnet` | Desplegar BNOU (producción) en BSC Mainnet | ✅ Listo |
-
-| `pnpm lint` | Ejecutar ESLint |
-| `pnpm format` | Formatear código con Prettier |
-| `pnpm typecheck` | Ejecutar verificador de tipos TypeScript |
+| `pnpm hardhat verify-bscscan --network bscTestnet` | Verificar todos los contratos en BSC Testnet | ✅ Listo |
+| `pnpm hardhat verify-bscscan --network bsc` | Verificar todos los contratos en BSC Mainnet | ✅ Listo |
+| `pnpm lint` | Ejecutar ESLint | ✅ Listo |
+| `pnpm format` | Formatear código con Prettier | ✅ Listo |
+| `pnpm typecheck` | Ejecutar verificador de tipos TypeScript | ✅ Listo |
 
 ## Testing
 
@@ -279,17 +291,116 @@ pnpm hardhat verify --network bscTestnet <DIRECCION_CONTRATO>
 
 Asegúrate de desplegar BNOU en una red soportada o usa BNOU.dev para testing local en Hardhat.
 
-## Verificación de Contratos
+### Limpiar Caché de Despliegue (Problemas de Reconciliación)
 
-Verificar contratos en BscScan después del despliegue:
+Si encuentras un error **reconciliation failed** al desplegar, significa que Hardhat Ignition detectó una discrepancia entre:
+- La dirección de despliegue que usó el despliegue anterior
+- La dirección de despliegue actual (derivada de tu `PRIVATE_KEY` en `.env`)
+
+**Ejemplo de Error:**
+```
+[ BNOUTokenModule ] reconciliation failed ⛔
+From account has been changed from 0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266 to 0x8d447121d5fed79965be10ebea6305691e8ecb89
+```
+
+#### Solución: Limpiar el Caché de Despliegue
+
+Hardhat Ignition almacena el estado del despliegue en `ignition/deployments/chain-<CHAIN_ID>/`. Para limpiar el caché y permitir un despliegue nuevo:
 
 ```bash
-# Verificar un contrato
-pnpm hardhat verify --network bscTestnet <DIRECCION_CONTRATO> <ARGS_CONSTRUCTOR>
+# Limpiar caché para BSC Testnet (chain 97)
+rm -rf ignition/deployments/chain-97/
 
-# Ejemplo: Verificar BitnouCoin
-pnpm hardhat verify --network bscTestnet 0x1234...5678 0xTuDireccionInicializadora
+# Limpiar caché para BSC Mainnet (chain 56)
+rm -rf ignition/deployments/chain-56/
+
+# Limpiar caché para Ethereum Sepolia (chain 11155111)
+rm -rf ignition/deployments/chain-11155111/
+
+# Limpiar todos los cachés de despliegue
+rm -rf ignition/deployments/
 ```
+
+⚠️ **Advertencia**: Limpiar el caché pierde el seguimiento de los contratos desplegados anteriormente. Solo hazlo si:
+1. Estás desplegando con una nueva dirección
+2. Estás redesplegando en una testnet
+3. Ya documentaste las direcciones de contratos desplegados en otro lugar
+
+#### Mejores Prácticas
+
+- **Mantén tu `PRIVATE_KEY` consistente** en `.env` para despliegues en la misma red
+- **Documenta las direcciones desplegadas** por separado (ej: en un archivo de registro de despliegue)
+- **Haz backup de la carpeta `ignition/deployments/`** antes de limpiar si necesitas referenciar despliegues anteriores
+- **Usa diferentes cuentas** para despliegues en mainnet y testnet por seguridad
+
+## Verificación y Publicación de Contratos
+
+Verifica y publica el código fuente de tu contrato en BscScan después del despliegue. Esto hace que el ABI del contrato esté disponible públicamente y genera confianza.
+
+### Requisitos Previos
+
+✅ **Ya configurado en este proyecto:**
+- Plugin `@nomicfoundation/hardhat-verify` instalado
+- API key de BscScan guardada en `.env` como `BSCSCAN_API_KEY`
+- Configuración de redes para BSC Mainnet (56) y BSC Testnet (97)
+
+### Usar la Tarea de Verificación
+
+Para mayor comodidad, usa la tarea personalizada de Hardhat para verificar todos los contratos configurados:
+
+```bash
+# Verificar todos los contratos en BSC Testnet
+pnpm hardhat verify-bscscan --network bscTestnet
+
+# Verificar todos los contratos en BSC Mainnet
+pnpm hardhat verify-bscscan --network bsc
+```
+
+### Comando de Verificación Manual
+
+Para contratos individuales con diferentes argumentos de constructor:
+
+```bash
+# Sintaxis
+pnpm hardhat verify --network <nombreRed> <DIRECCION_CONTRATO> <ARGS_CONSTRUCTOR>
+
+# Ejemplo con argumentos de constructor
+pnpm hardhat verify --network bscTestnet 0xTuDireccion arg1 arg2 arg3
+
+# Ejemplo con argumentos de array
+pnpm hardhat verify --network bscTestnet 0xTuDireccion '["0xAddress1", "0xAddress2"]' 100
+```
+
+### Qué Sucede
+
+Cuando ejecutas el comando de verificación:
+1. ✅ Se comparan la versión del compilador y la configuración
+2. ✅ El código fuente del contrato se reconstruye desde los artefactos
+3. ✅ El bytecode se verifica contra el bytecode en cadena
+4. ✅ El código fuente se publica en BscScan
+5. ✅ El ABI del contrato es públicamente legible
+6. ✅ Los usuarios pueden interactuar con el contrato a través de la interfaz de BscScan
+
+### Solución de Problemas
+
+**Error: "Already Verified"**
+- El contrato ya está verificado; consulta BscScan
+
+**Error: "Bytecode mismatch"**
+- Asegúrate de verificar con la versión exacta del compilador y la configuración usada en el despliegue
+- Comprueba hardhat.config.ts para la versión correcta de Solidity
+
+**Error: "Invalid API Key"**
+- Verifica que `BSCSCAN_API_KEY` esté configurado correctamente en `.env`
+- Comprueba que la API key sea válida en [BscScan API](https://bscscan.com/apis)
+
+### Después de la Verificación
+
+Una vez verificado, los usuarios pueden:
+- 👁️ Ver el código fuente en BscScan
+- 📋 Leer el ABI sin necesidad de documentación separada
+- 🔗 Interactuar directamente a través de la interfaz "Write Contract" de BscScan
+- 📊 Verificar la legitimidad y seguridad del contrato
 
 ## Seguridad y Aseguramiento de Calidad
 

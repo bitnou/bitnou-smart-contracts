@@ -10,7 +10,7 @@ async function main() {
     
     // Use ignition as fallback
     const BNOUTokenModule = await hre.ignition.deploy(
-      await import("../ignition/modules/BNOUTokenModule"), 
+      await import("../ignition/modules/BNOUTokenModule.js"), 
       { network: "localhost" }
     );
     
